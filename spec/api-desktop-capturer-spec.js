@@ -53,10 +53,23 @@ describe('desktopCapturer', () => {
 
   it('responds to subsequent calls of different options', async () => {
     const sources1 = await desktopCapturer.getSources({ types: ['window'] })
-    expect(sources1).to.be.an('array').that.is.not.empty()
-
     const sources2 = await desktopCapturer.getSources({ types: ['screen'] })
+
+    expect(sources1).to.be.an('array').that.is.not.empty()
     expect(sources2).to.be.an('array').that.is.not.empty()
+  })
+
+  // TODO(codebytere): remove when promisification is complete
+  it('responds to subsequent calls of different options (callback)', (done) => {
+    let callCount = 0
+    const callback = (error, sources) => {
+      callCount++
+      expect(error).to.be.null()
+      if (callCount === 2) done()
+    }
+
+    desktopCapturer.getSources({ types: ['window'] }, callback)
+    desktopCapturer.getSources({ types: ['screen'] }, callback)
   })
 
   it('returns an empty display_id for window sources on Windows and Mac', async () => {
