@@ -1940,7 +1940,7 @@ void WebContents::SetZoomFactor(double factor) {
 }
 
 double WebContents::GetZoomFactor() const {
-  auto level = GetZoomLevel();
+  double level = zoom_controller_->GetZoomLevel();
   return content::ZoomLevelToZoomFactor(level);
 }
 
@@ -1948,7 +1948,7 @@ void WebContents::OnSetTemporaryZoomLevel(content::RenderFrameHost* rfh,
                                           double level,
                                           IPC::Message* reply_msg) {
   zoom_controller_->SetTemporaryZoomLevel(level);
-  double new_level = zoom_controller_->GetZoomLevel();
+  double new_level = GetZoomFactor();
   AtomFrameHostMsg_SetTemporaryZoomLevel::WriteReplyParams(reply_msg,
                                                            new_level);
   rfh->Send(reply_msg);
@@ -1956,7 +1956,8 @@ void WebContents::OnSetTemporaryZoomLevel(content::RenderFrameHost* rfh,
 
 void WebContents::OnGetZoomLevel(content::RenderFrameHost* rfh,
                                  IPC::Message* reply_msg) {
-  AtomFrameHostMsg_GetZoomLevel::WriteReplyParams(reply_msg, GetZoomLevel());
+  double zoom_level = zoom_controller_->GetZoomLevel();
+  AtomFrameHostMsg_GetZoomLevel::WriteReplyParams(reply_msg, zoom_level);
   rfh->Send(reply_msg);
 }
 
@@ -2159,9 +2160,9 @@ void WebContents::BuildPrototype(v8::Isolate* isolate,
 #endif
       .SetMethod("invalidate", &WebContents::Invalidate)
       .SetMethod("setZoomLevel", &WebContents::SetZoomLevel)
-      .SetMethod("_getZoomLevel", &WebContents::GetZoomLevel)
+      .SetMethod("getZoomLevel", &WebContents::GetZoomLevel)
       .SetMethod("setZoomFactor", &WebContents::SetZoomFactor)
-      .SetMethod("_getZoomFactor", &WebContents::GetZoomFactor)
+      .SetMethod("getZoomFactor", &WebContents::GetZoomFactor)
       .SetMethod("getType", &WebContents::GetType)
       .SetMethod("_getPreloadPath", &WebContents::GetPreloadPath)
       .SetMethod("getWebPreferences", &WebContents::GetWebPreferences)
